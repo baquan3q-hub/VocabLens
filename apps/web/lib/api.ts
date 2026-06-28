@@ -5,7 +5,7 @@ import { createRequestClient, hasSupabaseConfig } from "./supabase/server";
 export type RequestContext = { supabase: SupabaseClient | null; user: User | null; demo: boolean };
 
 export async function getRequestContext(request: Request): Promise<RequestContext> {
-  const supabase = createRequestClient(request);
+  const supabase = await createRequestClient(request);
   if (!supabase || (!hasSupabaseConfig() && process.env.NODE_ENV !== "production")) {
     return { supabase: null, user: null, demo: true };
   }

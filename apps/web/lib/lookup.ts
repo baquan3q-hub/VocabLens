@@ -39,18 +39,37 @@ async function saveCache(term: string, payload: LexicalEntry): Promise<void> {
 
 async function translateWithGemini(term: string, definition: string, context?: string): Promise<string | null> {
   const key = process.env.GEMINI_API_KEY;
-  if (!key) return null;
-  const model = process.env.GEMINI_MODEL || "gemini-3-flash";
-  const prompt = `Dịch ngắn gọn từ tiếng Anh sang tiếng Việt. Chỉ trả về nghĩa tiếng Việt, không giải thích.\nTừ: ${term}\nĐịnh nghĩa: ${definition}\nNgữ cảnh: ${context ?? "không có"}`;
+  if (!key) { console.error("[VocabLens] No GEMINI_API_KEY found"); return null; }
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  console.log(`[VocabLens] Translating "${term}" with model ${model}`);
+  const prompt = `Bạn là chuyên gia dịch thuật Anh-Việt. Hãy dịch nghĩa của từ tiếng Anh sang tiếng Việt.
+
+Yêu cầu:
+- Dịch ngắn gọn, chính xác theo nghĩa trong ngữ cảnh
+- Chỉ trả về nghĩa tiếng Việt, KHÔNG giải thích thêm
+- Nếu có nhiều nghĩa, liệt kê bằng dấu phẩy (tối đa 3 nghĩa)
+- Dịch theo bối cảnh câu nếu có
+
+Từ: ${term}
+Định nghĩa tiếng Anh: ${definition}
+Ngữ cảnh sử dụng: ${context || "không có"}`;
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
-      method: "POST", headers: { "content-type": "application/json" }, signal: AbortSignal.timeout(8_000),
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1, maxOutputTokens: 80 } })
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+    const response = await fetch(url, {
+      method: "POST", headers: { "content-type": "application/json" }, signal: AbortSignal.timeout(15_000),
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.15, maxOutputTokens: 200 } })
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`[VocabLens] Gemini API error: ${response.status} - ${errorBody}`);
+      return null;
+    }
     const body = await response.json();
-    return body.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-  } catch { return null; }
+    const result = body.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    console.log(`[VocabLens] Gemini result for "${term}": ${result}`);
+    if (result && result.length > 500) return result.slice(0, 500);
+    return result;
+  } catch (error) { console.error("[VocabLens] Gemini translate error:", error); return null; }
 }
 
 export async function lookupTerm(rawTerm: string, context?: string): Promise<LexicalEntry> {
@@ -77,14 +96,16 @@ export async function lookupTerm(rawTerm: string, context?: string): Promise<Lex
       ...(meaning.antonyms ?? []), ...(meaning.definitions ?? []).flatMap(item => item.antonyms ?? [])
     ]))].slice(0, 10);
     const examples = definitions.map(item => item.example).filter(Boolean) as string[];
-    const translation = await translateWithGemini(term, definitions[0].text, context)
+    const geminiTranslation = await translateWithGemini(term, definitions[0].text, context);
+    const translation = geminiTranslation
       ?? FALLBACKS[term]?.translation
-      ?? `Nghĩa của “${term}” trong ngữ cảnh`;
+      ?? definitions[0].text;
+    const hasRealTranslation = Boolean(geminiTranslation || FALLBACKS[term]?.translation);
     const result: LexicalEntry = {
       term: row.word ?? term, normalizedTerm: term, phonetic: row.phonetic ?? row.phonetics?.find(item => item.text)?.text ?? "",
       audioUrl: firstAudio, definitions, translationVi: translation, synonyms, antonyms, examples, source: "dictionaryapi"
     };
-    await saveCache(term, result);
+    if (hasRealTranslation) await saveCache(term, result);
     return result;
   } catch {
     const fallback = FALLBACKS[term];

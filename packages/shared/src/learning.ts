@@ -16,6 +16,14 @@ export function isLookupTerm(value: string): boolean {
   return normalized.length > 0 && normalized.length <= 64 && /^[a-z]+(?:['-][a-z]+)?$/i.test(normalized);
 }
 
+export function isTranslatablePassage(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed.length < 2 || trimmed.length > 5000) return false;
+  if (!/[a-zA-Z]/.test(trimmed)) return false;
+  const wordCount = trimmed.split(/\s+/).filter(w => w.length > 0).length;
+  return wordCount >= 2;
+}
+
 export function proficiencyFromScore(score: number): Proficiency {
   if (score <= 1) return "new";
   if (score <= 3) return "learning";

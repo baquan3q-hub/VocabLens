@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VocabLens</title>
+    <style>
+      *{box-sizing:border-box}body{width:330px;margin:0;padding:18px;font:14px/1.5 Inter,system-ui,sans-serif;color:#111827;background:#fff}header{display:flex;align-items:center;gap:10px;margin-bottom:16px}.mark{width:36px;height:36px;border-radius:10px;background:#7c3aed;color:#fff;display:grid;place-items:center}h1{font-size:18px;margin:0}p{margin:0;color:#6b7280}.status{margin:14px 0;padding:11px 12px;border-radius:9px;background:#f5f3ff;color:#6d28d9}.status.error{background:#fee2e2;color:#b91c1c}.steps{padding-left:20px;color:#374151}.steps li{margin:7px 0}button,a{width:100%;min-height:40px;border-radius:9px;border:1px solid #d1d5db;padding:9px 12px;font:600 13px Inter,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;cursor:pointer}button{background:#7c3aed;color:white;border-color:#7c3aed}button:disabled{opacity:.55;cursor:not-allowed}a{color:#111827;background:white;margin-top:8px}:focus-visible{outline:3px solid rgba(139,92,246,.28);outline-offset:2px}.meta{font-size:10px;margin-top:12px;word-break:break-all}
+    </style>
+  </head>
+  <body>
+    <header><span class="mark"><i data-icon="BookOpen"></i></span><div><h1>VocabLens</h1><p>Học từ trong ngữ cảnh</p></div></header>
+    <div id="status" class="status" role="status">Đang kiểm tra kết nối...</div>
+    <ol class="steps"><li>Mở một trang tiếng Anh.</li><li>Bôi đen đúng một từ.</li><li>Xem nghĩa và chọn lưu.</li></ol>
+    <button id="signin" hidden><i data-icon="LogIn"></i> Đăng nhập với Google</button>
+    <a id="dashboard" href="http://localhost:3000/dashboard" target="_blank"><i data-icon="LayoutDashboard"></i> Mở Dashboard</a>
+    <p id="meta" class="meta"></p>
+    <script type="module" src="/popup.js"></script>
+  </body>
+</html>

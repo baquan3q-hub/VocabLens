@@ -1,9 +1,14 @@
 {
   "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuMKKXTpOElscGdN1EgYh5qIH5S51VIQUJpnxjKaRsV8Q/J5dgHdaU5a2zi6aSBTBEe4CzM8vXnF2EnbRSqF5QLmPG5BZM/HH3CSnzWlGzCfp/mQpgNL2YHvS2njaWHwcVpGIRQbo21jywbmiQ5NSOrj1dR/3AlT3ZFsoEbhYX/UMLJCIwrcDRV6LlRsUhSi4Ud9dA8PdZjK5b5m66IaCr7QWiKLjtcZDDA25VHDEjcFGpm1JQDsfc+zFQLQPLdQVwU5Cr4xHWcfADaa2tw+nuas4jNehk2K7Gkde4p/qxkQq6ELUxyBgf8Ew41eiX0YKJQ/ZCbVmj3p0LvvPEOFTnQIDAQAB",
   "name": "VocabLens",
   "version": "0.1.0",
   "description": "Tra và lưu từ tiếng Anh ngay trong ngữ cảnh đang đọc.",
   "permissions": ["storage", "identity"],
+  "action": {
+    "default_title": "VocabLens",
+    "default_popup": "popup.html"
+  },
   "host_permissions": [
     "http://localhost:3000/*",
     "https://*.vercel.app/*",

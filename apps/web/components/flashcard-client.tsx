@@ -37,7 +37,11 @@ export function FlashcardClient() {
 
   if (!word || finished) return <div className="page review-page"><div className="panel quiz-result"><Check size={48} color="var(--success)" /><h1>Hoàn thành phiên ôn!</h1><p className="muted">Bạn vừa ôn {queue.length} từ. Một vòng nhỏ, một bước nhớ lâu hơn.</p><div style={{ display: "flex", justifyContent: "center", gap: 10 }}><button className="button button-secondary" onClick={() => { setIndex(0); setFlipped(false); setFinished(false); }}><RotateCcw size={16} /> Ôn lại</button><Link className="button button-primary" href="/review/quiz">Làm quiz</Link></div></div></div>;
 
-  const play = (event: React.MouseEvent) => { event.stopPropagation(); word.audioUrl ? new Audio(word.audioUrl).play() : speechSynthesis.speak(new SpeechSynthesisUtterance(word.term)); };
+  const play = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (word.audioUrl) void new Audio(word.audioUrl).play();
+    else speechSynthesis.speak(new SpeechSynthesisUtterance(word.term));
+  };
   return <div className="page review-page"><header className="page-header"><div><p className="eyebrow">Spaced repetition</p><h1>Flashcards</h1><p className="muted">Space để lật · ← Không nhớ · → Nhớ rồi</p></div><Link className="button button-secondary" href="/dashboard"><ArrowLeft size={16} /> Dashboard</Link></header>
     <div className="review-progress"><span className="muted small">{index + 1}/{queue.length}</span><div className="progress-track" role="progressbar" aria-valuenow={index + 1} aria-valuemin={1} aria-valuemax={queue.length}><div className="progress-bar" style={{ width: `${(index + 1) / queue.length * 100}%` }} /></div></div>
     <div className="flashcard-scene"><div className={`flashcard ${flipped ? "flipped" : ""}`} role="button" tabIndex={0} onClick={() => setFlipped(value => !value)} onKeyDown={event => { if (event.key === "Enter") setFlipped(value => !value); }} aria-label={flipped ? `Mặt sau: ${word.translationVi}` : `Mặt trước: ${word.term}. Nhấn để lật`}>

@@ -16,7 +16,7 @@ export function QuizClient() {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Answer[]>([]);
-  const [startedAt, setStartedAt] = useState(Date.now());
+  const [startedAt, setStartedAt] = useState(0);
   const [finished, setFinished] = useState(false);
   const question = questions[index];
   const score = useMemo(() => answers.filter(answer => answer.isCorrect).length, [answers]);

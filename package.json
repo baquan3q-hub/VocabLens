@@ -10,12 +10,18 @@
     "dev": "npm run dev -w @vocablens/web",
     "dev:web": "npm run dev -w @vocablens/web",
     "dev:extension": "npm run dev -w @vocablens/extension",
-    "build": "npm run build -w @vocablens/shared && npm run build -w @vocablens/web && npm run build -w @vocablens/extension",
+    "build": "npm run build -w @vocablens/shared && npm run build -w @vocablens/extension && node scripts/package-extension.mjs && npm run build -w @vocablens/web",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test -w @vocablens/shared",
+    "test": "npm run test -w @vocablens/shared && npm run test -w @vocablens/extension",
+    "test:smoke": "node scripts/smoke-api.mjs",
+    "test:extension": "node scripts/smoke-extension.mjs",
+    "check": "npm run typecheck && npm test && npm run build && npm run validate -w @vocablens/extension",
     "lint": "npm run lint -w @vocablens/web"
   },
   "engines": {
     "node": ">=20.9"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.57.0"
   }
 }

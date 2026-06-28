@@ -54,3 +54,18 @@ export interface QuizQuestion {
   direction: "word-to-meaning" | "meaning-to-word";
   explanation: string;
 }
+
+export interface DifficultWord {
+  word: string;
+  meaning: string;
+  phonetic?: string;
+  partOfSpeech?: string;
+  difficulty: "intermediate" | "advanced";
+}
+
+export interface PassageTranslation {
+  originalText: string;
+  translatedText: string;
+  difficultWords: DifficultWord[];
+  contextNote?: string;
+}

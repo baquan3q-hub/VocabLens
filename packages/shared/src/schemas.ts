@@ -49,3 +49,8 @@ export const quizSessionSchema = z.object({
     responseMs: z.number().int().nonnegative().optional()
   })).min(1).max(50)
 });
+
+export const translatePassageSchema = z.object({
+  text: z.string().trim().min(2).max(5000),
+  sourceUrl: z.string().max(2048).optional()
+});
