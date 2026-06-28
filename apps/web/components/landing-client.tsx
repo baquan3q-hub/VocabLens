@@ -11,13 +11,9 @@ import {
   Cloud, 
   BarChart3, 
   Layers3, 
-  CircleHelp, 
   Puzzle, 
-  Play, 
   Volume2, 
   CheckCircle,
-  HelpCircle,
-  Library,
   ChevronRight
 } from "lucide-react";
 
@@ -115,7 +111,7 @@ export function LandingClient() {
                   >
                     serendipity
                   </span>
-                  . Alexander Fleming noticed a mold that killed bacteria, leading to the world's first active antibiotic.
+                  . Alexander Fleming noticed a mold that killed bacteria, leading to the world&apos;s first active antibiotic.
                 </p>
 
                 {wordClicked && (
@@ -137,7 +133,7 @@ export function LandingClient() {
                     </div>
 
                     <div className="mockup-popover-context">
-                      <strong>Ngữ cảnh:</strong> "...was a stroke of pure <span style={{ color: "var(--primary-600)", fontWeight: 600 }}>serendipity</span>."
+                      <strong>Ngữ cảnh:</strong> &ldquo;...was a stroke of pure <span style={{ color: "var(--primary-600)", fontWeight: 600 }}>serendipity</span>.&rdquo;
                     </div>
 
                     <div style={{ marginTop: "14px", display: "flex", gap: "8px" }}>

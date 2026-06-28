@@ -10,9 +10,7 @@ import {
   Play, 
   Target, 
   TrendingUp, 
-  Sparkles, 
-  Search, 
-  Plus
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { 
@@ -27,7 +25,7 @@ import {
   XAxis, 
   YAxis 
 } from "recharts";
-import { demoWords, reviewTrend } from "@/lib/demo-data";
+import { reviewTrend } from "@/lib/demo-data";
 import { WordTable } from "./word-table";
 
 const pieColors = ["#22c55e", "#3b82f6", "#f59e0b", "#818cf8"];
@@ -35,7 +33,6 @@ const pieColors = ["#22c55e", "#3b82f6", "#f59e0b", "#818cf8"];
 export function DashboardClient() {
   const [words, setWords] = useState<VocabularyItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [greeting, setGreeting] = useState("Chào Anh Quân! 👋");
 
   useEffect(() => {
     fetch("/api/words?limit=20")
@@ -46,17 +43,6 @@ export function DashboardClient() {
       })
       .catch(() => setLoading(false));
 
-    // Set time-of-day greeting
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) {
-      setGreeting("Chào buổi sáng, Anh Quân! 🌅");
-    } else if (hour >= 12 && hour < 18) {
-      setGreeting("Chào buổi chiều, Anh Quân! ☀️");
-    } else if (hour >= 18 && hour < 22) {
-      setGreeting("Chào buổi tối, Anh Quân! 🌙");
-    } else {
-      setGreeting("Chăm chỉ quá, Anh Quân ơi! 🦉");
-    }
   }, []);
 
   const due = words.filter(word => new Date(word.nextReviewAt) <= new Date()).length;
@@ -81,7 +67,7 @@ export function DashboardClient() {
           <p className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <Sparkles size={12} /> Hướng học tập hôm nay
           </p>
-          <h1>{greeting}</h1>
+          <h1>Chào Anh Quân!</h1>
           <p className="muted">Hôm nay là một ngày tuyệt vời để tiếp thu thêm các từ vựng mới.</p>
         </div>
         <div style={{ display: "flex", gap: "10px" }}>

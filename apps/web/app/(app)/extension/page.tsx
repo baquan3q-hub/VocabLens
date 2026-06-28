@@ -132,7 +132,7 @@ export default function ExtensionPage() {
             </div>
             <p style={{ fontSize: 12, color: "var(--text-2)", margin: "0 0 10px 0" }}>A typical example or pattern of something; a model.</p>
             <p style={{ fontSize: 11, color: "var(--text-3)", fontStyle: "italic", borderLeft: "2px solid var(--border-strong)", paddingLeft: 8, margin: "0 0 16px 0" }}>
-              "A paradigm shift can change the way a team understands a problem."
+              &ldquo;A paradigm shift can change the way a team understands a problem.&rdquo;
             </p>
             <button className="button button-primary button-sm" style={{ width: "100%", background: "var(--success)", border: "none", color: "white" }} disabled>
               ✓ Saved to Dashboard

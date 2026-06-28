@@ -1,6 +1,6 @@
-import { execSync } from "node:child_process";
-import { existsSync, mkdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { relative, resolve } from "node:path";
+import { zipSync } from "fflate";
 
 const extDist = resolve("apps/extension/dist");
 const publicDir = resolve("apps/web/public");
@@ -16,32 +16,15 @@ if (!existsSync(extDist)) {
   process.exit(1);
 }
 
-try {
-  if (process.platform === "win32") {
-    // Windows: Try powershell Compress-Archive first, then fallback to tar
-    try {
-      console.log("Attempting to package using PowerShell Compress-Archive...");
-      // Using -Path 'path/*' packs the contents, not the folder itself
-      execSync(`powershell -Command "Compress-Archive -Path '${extDist}/*' -DestinationPath '${zipPath}' -Force"`, { stdio: "inherit" });
-      console.log("Packaged successfully via PowerShell.");
-    } catch (e) {
-      console.log("PowerShell Compress-Archive failed. Trying tar...");
-      execSync(`tar -a -c -f "${zipPath}" -C "${extDist}" .`, { stdio: "inherit" });
-      console.log("Packaged successfully via tar.");
-    }
-  } else {
-    // Unix/Linux/macOS: Try tar first, then fallback to zip command
-    try {
-      console.log("Attempting to package using tar...");
-      execSync(`tar -a -c -f "${zipPath}" -C "${extDist}" .`, { stdio: "inherit" });
-      console.log("Packaged successfully via tar.");
-    } catch (e) {
-      console.log("tar failed. Trying zip command...");
-      execSync(`cd "${extDist}" && zip -r "${zipPath}" .`, { stdio: "inherit" });
-      console.log("Packaged successfully via zip.");
-    }
+const files = {};
+function collect(directory) {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const absolute = resolve(directory, entry.name);
+    if (entry.isDirectory()) collect(absolute);
+    else files[relative(extDist, absolute).replaceAll("\\", "/")] = new Uint8Array(readFileSync(absolute));
   }
-} catch (err) {
-  console.error("All packaging attempts failed:", err);
-  process.exit(1);
 }
+
+collect(extDist);
+writeFileSync(zipPath, zipSync(files, { level: 9 }));
+console.log(`Packaged ${Object.keys(files).length} extension files to ${zipPath}`);

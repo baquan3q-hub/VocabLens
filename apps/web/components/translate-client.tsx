@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Languages, Loader2, Save, Check, AlertCircle, BookOpen, Volume2 } from "lucide-react";
+import { Languages, Loader2, Save, Volume2 } from "lucide-react";
 import { toast } from "sonner";
-import type { PassageTranslation, DifficultWord } from "@vocablens/shared";
+import type { PassageTranslation } from "@vocablens/shared";
 
 export function TranslateClient() {
   const [text, setText] = useState("");
