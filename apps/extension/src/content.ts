@@ -9,6 +9,7 @@ let currentContext = "";
 let currentPassage: PassageTranslation | null = null;
 let selectedDifficultWords: Set<number> = new Set();
 let currentSelectionRect: DOMRect | null = null;
+let hasBeenDragged = false;
 
 const styles = `
   :host { all: initial; color-scheme: light; }
@@ -16,7 +17,8 @@ const styles = `
   .popup { width: 360px; max-height: min(520px, calc(100vh - 24px)); overflow: auto; background: #fff; color: #111827; border: 1px solid #e5e7eb; border-radius: 18px; box-shadow: 0 12px 36px rgba(15,23,42,.18); padding: 18px; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 1.55; animation: enter 180ms ease-out; }
   .popup.passage-popup { width: 440px; max-height: min(600px, calc(100vh - 24px)); }
   @keyframes enter { from { opacity: 0; transform: translateY(7px); } }
-  .header { display: flex; align-items: flex-start; gap: 8px; }
+  .header { display: flex; align-items: flex-start; gap: 8px; cursor: grab; user-select: none; }
+  .header:active { cursor: grabbing; }
   .title { flex: 1; min-width: 0; }
   h2 { margin: 0; font-size: 23px; line-height: 1.25; letter-spacing: -.02em; }
   h2.passage-title { font-size: 18px; display: flex; align-items: center; gap: 8px; }
@@ -83,15 +85,91 @@ function getRoot(): ShadowRoot {
   if (!host) {
     host = document.createElement("div"); host.id = HOST_ID; host.style.cssText = "position:fixed;z-index:2147483647;left:0;top:0";
     document.documentElement.appendChild(host); const root = host.attachShadow({ mode: "open" }); const style = document.createElement("style"); style.textContent = styles; root.appendChild(style); root.addEventListener("click", event => event.stopPropagation());
+    setupDraggable(root, host);
   }
   return host.shadowRoot!;
 }
 
 function positionPopup(rect: DOMRect, isPassage = false) {
+  if (hasBeenDragged) return;
   const host = document.getElementById(HOST_ID)!;
   const popupWidth = isPassage ? 440 : 360;
   const { left, top } = computePopupPosition(rect, { width: window.innerWidth, height: window.innerHeight }, { width: popupWidth, estimatedHeight: isPassage ? 500 : 420, gap: 10, margin: 12 });
   host.style.left = `${left}px`; host.style.top = `${top}px`;
+}
+
+function setupDraggable(root: ShadowRoot, host: HTMLElement) {
+  let isDragging = false;
+  let startX = 0;
+  let startY = 0;
+  let initialLeft = 0;
+  let initialTop = 0;
+
+  root.addEventListener("mousedown", (e) => {
+    const event = e as MouseEvent;
+    const target = event.target as HTMLElement;
+    const header = target.closest(".header");
+    const isButton = target.closest("button");
+
+    if (header && !isButton) {
+      isDragging = true;
+      startX = event.clientX;
+      startY = event.clientY;
+
+      const rect = host.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      // Prevent text selection during drag
+      event.preventDefault();
+
+      const onMouseMove = (moveEvent: MouseEvent) => {
+        if (!isDragging) return;
+        hasBeenDragged = true;
+
+        const dx = moveEvent.clientX - startX;
+        const dy = moveEvent.clientY - startY;
+
+        let newLeft = initialLeft + dx;
+        let newTop = initialTop + dy;
+
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const popupEl = root.querySelector(".popup");
+
+        if (popupEl) {
+          const popupRect = popupEl.getBoundingClientRect();
+          const margin = 10;
+
+          // Clamp left
+          if (popupRect.width < viewportWidth) {
+            newLeft = Math.max(margin, Math.min(viewportWidth - popupRect.width - margin, newLeft));
+          } else {
+            newLeft = Math.max(0, newLeft);
+          }
+
+          // Clamp top
+          if (popupRect.height < viewportHeight) {
+            newTop = Math.max(margin, Math.min(viewportHeight - popupRect.height - margin, newTop));
+          } else {
+            newTop = Math.max(0, newTop);
+          }
+        }
+
+        host.style.left = `${newLeft}px`;
+        host.style.top = `${newTop}px`;
+      };
+
+      const onMouseUp = () => {
+        isDragging = false;
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+      };
+
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
+    }
+  });
 }
 
 function iconize(root: ShadowRoot) { createIcons({ icons: { Bookmark, BookOpen, Check, Languages, LoaderCircle, LogIn, Save, Volume2, X }, attrs: { width: "17", height: "17", "stroke-width": "1.8" }, nameAttr: "data-icon", root }); }
@@ -101,7 +179,7 @@ function render(html: string, isPassage = false) {
   root.getElementById("close")?.addEventListener("click", closePopup);
 }
 
-function closePopup() { document.getElementById(HOST_ID)?.remove(); currentEntry = null; currentPassage = null; selectedDifficultWords = new Set(); currentSelectionRect = null; removeTrigger(); }
+function closePopup() { document.getElementById(HOST_ID)?.remove(); currentEntry = null; currentPassage = null; selectedDifficultWords = new Set(); currentSelectionRect = null; hasBeenDragged = false; removeTrigger(); }
 
 async function send(message: ExtensionRequest): Promise<ExtensionResponse> {
   try { return await chrome.runtime.sendMessage(message); }
@@ -315,6 +393,7 @@ function showTranslateTrigger(rect: DOMRect, text: string) {
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
     removeTrigger();
+    hasBeenDragged = false;
     positionPopup(rect, true);
     translatePassage(text);
   });
@@ -340,9 +419,11 @@ document.addEventListener("mouseup", event => {
     if (isLookupTerm(text)) {
       removeTrigger();
       currentContext = getContextSentence(selection);
+      hasBeenDragged = false;
       getRoot(); positionPopup(rect, false);
       lookup(text, currentContext);
     } else if (isTranslatablePassage(text)) {
+      hasBeenDragged = false;
       getRoot();
       showTranslateTrigger(rect, text);
     }
