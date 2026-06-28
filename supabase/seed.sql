@@ -1,0 +1,2 @@
+-- Seed data is intentionally omitted because vocabulary belongs to authenticated users.
+-- The web application includes a local demo dataset for zero-config evaluation.

@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "VocabLens",
+  "version": "0.1.0",
+  "description": "Tra và lưu từ tiếng Anh ngay trong ngữ cảnh đang đọc.",
+  "permissions": ["storage", "identity"],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "https://*.vercel.app/*",
+    "https://*.supabase.co/*"
+  ],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "content_scripts": [{
+    "matches": ["http://*/*", "https://*/*"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }]
+}

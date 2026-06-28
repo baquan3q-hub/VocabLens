@@ -1,0 +1,21 @@
+{
+  "name": "vocablens",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @vocablens/web",
+    "dev:web": "npm run dev -w @vocablens/web",
+    "dev:extension": "npm run dev -w @vocablens/extension",
+    "build": "npm run build -w @vocablens/shared && npm run build -w @vocablens/web && npm run build -w @vocablens/extension",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test -w @vocablens/shared",
+    "lint": "npm run lint -w @vocablens/web"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}
