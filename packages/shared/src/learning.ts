@@ -1,4 +1,4 @@
-import type { Proficiency, ReviewOutcome, ReviewResult, VocabularyItem, QuizQuestion } from "./types.js";
+import type { Proficiency, ReviewOutcome, ReviewResult, VocabularyItem, QuizQuestion } from "./types";
 
 const INTERVALS = [0, 1, 3, 7, 14, 30] as const;
 
